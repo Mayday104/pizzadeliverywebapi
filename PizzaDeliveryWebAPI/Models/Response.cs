@@ -1,6 +1,6 @@
 ﻿namespace PizzaDeliveryWebAPI.Models
 {
-    public class Respuesta
+    public class Response
     {
         public bool Success { get; set; }
         public object Data { get; set; }

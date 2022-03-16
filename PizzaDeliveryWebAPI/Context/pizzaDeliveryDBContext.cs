@@ -1,31 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using PizzaDeliveryWebAPI.Models;
 
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
+
 namespace PizzaDeliveryWebAPI.Context
 {
-    public partial class pizzaDeliveryDBContext : DbContext
+    public partial class PizzaDeliveryDBContext : DbContext
     {
-        public pizzaDeliveryDBContext()
+        public PizzaDeliveryDBContext()
         {
         }
 
-        public pizzaDeliveryDBContext(DbContextOptions<pizzaDeliveryDBContext> options)
+        public PizzaDeliveryDBContext(DbContextOptions<PizzaDeliveryDBContext> options)
             : base(options)
         {
         }
 
-        public virtual DbSet<Cliente> Clientes { get; set; } = null!;
-        public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
+        public virtual DbSet<Cliente> Cliente { get; set; }
+        public virtual DbSet<Usuario> Usuario { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=pizzadelivery; Trusted_Connection=False; User Id=sa;Password=Rivas2022*");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Server=localhost;Database=pizzadelivery;Trusted_Connection=False; User Id=sa;Password=Rivas2022*");
             }
         }
 
@@ -41,29 +44,32 @@ namespace PizzaDeliveryWebAPI.Context
                 entity.Property(e => e.IdCliente).HasColumnName("idCliente");
 
                 entity.Property(e => e.NoTelefono)
+                    .IsRequired()
+                    .HasColumnName("noTelefono")
                     .HasMaxLength(8)
-                    .IsUnicode(false)
-                    .HasColumnName("noTelefono");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.PrimerApellido)
+                    .IsRequired()
+                    .HasColumnName("primerApellido")
                     .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("primerApellido");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.PrimerNombre)
+                    .IsRequired()
+                    .HasColumnName("primerNombre")
                     .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("primerNombre");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.SegundoApellido)
+                    .HasColumnName("segundoApellido")
                     .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("segundoApellido");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.SegundoNombre)
+                    .HasColumnName("segundoNombre")
                     .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("segundoNombre");
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Usuario>(entity =>
@@ -73,21 +79,25 @@ namespace PizzaDeliveryWebAPI.Context
 
                 entity.ToTable("usuario");
 
-                entity.HasIndex(e => e.Email, "UQ__usuario__AB6E616455FD36E3")
+                entity.HasIndex(e => e.Email)
+                    .HasName("UQ__usuario__AB6E616455FD36E3")
                     .IsUnique();
 
                 entity.Property(e => e.IdUsuario).HasColumnName("idUsuario");
 
-                entity.Property(e => e.Contrasenia).HasColumnName("contrasenia");
+                entity.Property(e => e.Contrasenia)
+                    .IsRequired()
+                    .HasColumnName("contrasenia");
 
                 entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasColumnName("email")
                     .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasColumnName("email");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.FechaUltimoAcceso)
-                    .HasColumnType("datetime")
-                    .HasColumnName("fechaUltimoAcceso");
+                    .HasColumnName("fechaUltimoAcceso")
+                    .HasColumnType("datetime");
             });
 
             OnModelCreatingPartial(modelBuilder);

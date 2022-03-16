@@ -2,118 +2,76 @@
 using Microsoft.AspNetCore.Mvc;
 using PizzaDeliveryWebAPI.Context;
 using PizzaDeliveryWebAPI.Models;
+using System.Linq;
 
 namespace PizzaDeliveryWebAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ClientesController : ControllerBase
     {
 
-        pizzaDeliveryDBContext db = new pizzaDeliveryDBContext();
+        PizzaDeliveryDBContext db = new PizzaDeliveryDBContext();
 
         [HttpGet]
-        public Respuesta Get()
+        public Response Get()
         {
-            var listadoClientes = (from cliente in db.Clientes
-                                   select cliente).ToList();
+            var data = (from cliente in db.Cliente
+                        select cliente).ToList();
 
-            return new Respuesta { Success = true, Data = listadoClientes };
+            return new Response { Success = true, Data = data };
+
         }
 
-
         [HttpGet("{id}")]
-        public Respuesta Get(int id)
+        public Response Get(int id)
         {
-            Cliente clienteDB = (from cliente in db.Clientes
+            Cliente clienteDB = (from cliente in db.Cliente
                                  where cliente.IdCliente == id
                                  select cliente).FirstOrDefault();
 
-            return new Respuesta
+            if (clienteDB != null)
             {
-                Success = true,
-                Data = clienteDB
-            };
-        }
-
-        [HttpPost]
-        public Respuesta Post(Cliente cliente)
-        {
-            try
-            {
-                db.Clientes.Add(cliente);
-
-                db.SaveChanges();
-
-                return new Respuesta { Success = true, Data = cliente };
-            }
-            catch (Exception ex)
-            {
-                return new Respuesta { Success = false, Message = "Error: " + ex.Message };
-            }
-        }
-
-
-        [HttpPut("{id}")]
-        public Respuesta Put(int id, Cliente cliente)
-        {
-            Respuesta respuesta = new Respuesta();
-
-            Cliente clienteDB = (from clienteB in db.Clientes
-                                 where clienteB.IdCliente == id
-                                 select clienteB).FirstOrDefault();
-
-            if (clienteDB == null)
-            {
-                respuesta.Success = false;
-                respuesta.Message = "Cliente no encontrado";
+                return new Response { Success = true, Data = clienteDB };
             }
             else
             {
+                return new Response { Success = false, Data = null, Message= "Registro no encontrado" };
+            }
+        }
+
+        [HttpPost]
+        public Response Post(Cliente cliente)
+        {
+            db.Cliente.Add(cliente);
+            db.SaveChanges();
+
+            return new Response { Success = true, Data = cliente };
+        }
+
+        [HttpPut("{id}")]
+        public Response Put(int id,Cliente cliente)
+        {
+            Cliente clienteDB= (from clienteBusca in db.Cliente
+                                where clienteBusca.IdCliente==id
+                                select clienteBusca).FirstOrDefault();
+
+            if (clienteDB == null)
+            {
+                return new Response { Success = false, Data = null, Message = "Registro no encontrado" }; 
+            }
+            else
+            {
+                cliente.IdCliente = id;
+
                 db.Entry(clienteDB).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
                 db.Entry(cliente).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
-                try
-                {
-                    db.SaveChanges();
-
-                    respuesta.Success = true;
-                    respuesta.Data = cliente;
-                }
-                catch (Exception ex)
-                {
-                    respuesta.Success = false;
-                    respuesta.Message = "Error: " + ex.Message;
-                }
-            }
-
-            return respuesta;
-        }
-
-        [HttpDelete("{id}")]
-        public Respuesta Delete(int id)
-        {
-            Respuesta respuesta=new Respuesta();
-
-            Cliente clienteDb = db.Clientes.Find(id);
-
-            if (clienteDb == null)
-            {
-                respuesta.Success = false;
-                respuesta.Message = "Registro no encontrado";
-            }
-            else
-            {
-                db.Clientes.Remove(clienteDb);
                 db.SaveChanges();
 
-                respuesta.Success = true;
-                respuesta.Message = "Registro eliminado";
+                return new Response { Success = true, Data = cliente };
             }
-
-            return respuesta;
         }
-       
     }
 }
