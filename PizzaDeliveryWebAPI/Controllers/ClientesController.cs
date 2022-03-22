@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PizzaDeliveryWebAPI.Context;
 using PizzaDeliveryWebAPI.Models;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace PizzaDeliveryWebAPI.Controllers
 {
+    [EnableCors("AllowAll")]
     [Route("api/[controller]")]
     [ApiController]
     public class ClientesController : ControllerBase
@@ -41,12 +45,31 @@ namespace PizzaDeliveryWebAPI.Controllers
         }
 
         [HttpPost]
-        public Response Post(Cliente cliente)
+        public Response Post(ClienteUsuario clienteUsuario)
         {
-            db.Cliente.Add(cliente);
+
+            Usuario usuario = new Usuario();
+
+            usuario.Email = clienteUsuario.UsuarioViewModel.Email;
+
+            using (MD5 md5Hash= MD5.Create())
+            {
+                byte[] password = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(clienteUsuario.UsuarioViewModel.Contrasenia));
+
+                usuario.Contrasenia = password;
+            }
+            
+            db.Usuario.Add(usuario);
+
             db.SaveChanges();
 
-            return new Response { Success = true, Data = cliente };
+            clienteUsuario.Cliente.IdUsuario = usuario.IdUsuario;
+
+
+            db.Cliente.Add(clienteUsuario.Cliente);
+            db.SaveChanges();
+
+            return new Response { Success = true, Data = clienteUsuario };
         }
 
         [HttpPut("{id}")]
@@ -73,5 +96,25 @@ namespace PizzaDeliveryWebAPI.Controllers
                 return new Response { Success = true, Data = cliente };
             }
         }
+
+        [HttpDelete("{id}")]
+        public Response Delete(int id)
+        {
+            var clienteDB = (from cliente in db.Cliente
+                                where cliente.IdCliente == id
+                                select cliente).FirstOrDefault();
+
+            if (clienteDB == null)
+            {
+                return new Response { Success = false, Data = null, Message = "Registro no encontrado" };
+            }
+            else
+            {
+                db.Cliente.Remove(clienteDB);
+                db.SaveChanges();
+                return new Response { Success = true, Message = "Registro eliminado" };
+            }
+        }
+
     }
 }

@@ -26,6 +26,12 @@ namespace PizzaDeliveryWebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors(option =>
+           {
+               option.AddPolicy("AllowAll",
+                   builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+                   );
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +45,7 @@ namespace PizzaDeliveryWebAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 
