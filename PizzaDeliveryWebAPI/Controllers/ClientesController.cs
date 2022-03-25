@@ -34,6 +34,8 @@ namespace PizzaDeliveryWebAPI.Controllers
                                  where cliente.IdCliente == id
                                  select cliente).FirstOrDefault();
 
+
+
             if (clienteDB != null)
             {
                 return new Response { Success = true, Data = clienteDB };
